@@ -1,0 +1,2 @@
+"use strict";(globalThis.webpackChunktoursTREM=globalThis.webpackChunktoursTREM||[]).push([[805],{4805(e,s,l){l.r(s),l.d(s,{default:()=>a});l(318);var d=l(2427),u=l(579);function a(e){let{embedded:s=!1}=e;return(0,u.jsx)("div",{className:s?"tours-app-shell tours-app-shell--embedded":"tours-app-shell",children:(0,u.jsx)(d.A,{embedded:s})})}}}]);
+//# sourceMappingURL=805.89e06044.chunk.js.map

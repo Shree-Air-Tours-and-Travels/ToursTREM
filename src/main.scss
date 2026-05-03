@@ -1,0 +1,40 @@
+:root {
+    color-scheme: light;
+    --tours-bg: #f4efe3;
+    --tours-surface: #fffaf2;
+    --tours-border: rgba(91, 68, 37, 0.16);
+    --tours-text: #1d1a16;
+    --tours-muted: #6f6353;
+    --tours-accent: #0f766e;
+    --tours-accent-dark: #115e59;
+    --tours-shadow: 0 24px 48px rgba(40, 31, 19, 0.08);
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: "Segoe UI", sans-serif;
+    background:
+        radial-gradient(circle at top left, rgba(15, 118, 110, 0.12), transparent 28%),
+        linear-gradient(180deg, #fbf7ef 0%, #f1eadf 100%);
+    color: var(--tours-text);
+}
+
+a {
+    color: inherit;
+}
+
+#root {
+    min-height: 100vh;
+}
+
+.tours-app-shell {
+    min-height: 100vh;
+}
+
+.tours-app-shell--embedded {
+    min-height: auto;
+}
