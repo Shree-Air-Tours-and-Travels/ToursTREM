@@ -11,46 +11,22 @@ import { get } from "lodash";
 
 const PAGE_SIZE = 6;
 
-const SmallInlineLoader = ({ message = "Updating results..." }) => (
-  <div className="tours-page__inline-loader" role="status" aria-live="polite">
-    <div className="tours-page__inline-loader__dot" aria-hidden />
-    <div className="tours-page__inline-loader__text">{message}</div>
-  </div>
-);
-
-export const TourPreloader = ({ count = 4, showIntro = true }) => {
+const TourListSkeleton = ({ count = 6 }) => {
   const cards = Array.from({ length: count });
+
   return (
-    <section className="ui-tour ui-tour--loading" aria-busy="true" aria-label="Loading tours">
-      <div className="ui-tour__header">
-        {showIntro && (
-          <div className="ui-tour-preloader__intro" aria-hidden="true">
-            <div className="sp-line sp-title" />
-            <div className="sp-line sp-desc" />
+    <div className="tours-page__loading-grid" role="status" aria-live="polite" aria-label="Loading tours">
+      {cards.map((_, index) => (
+        <article className="tours-page__loading-card" key={index}>
+          <div className="tours-page__loading-media" />
+          <div className="tours-page__loading-body">
+            <div className="tours-page__loading-line tours-page__loading-line--title" />
+            <div className="tours-page__loading-line" />
+            <div className="tours-page__loading-line tours-page__loading-line--short" />
           </div>
-        )}
-      </div>
-
-      <div className="ui-tour-preloader__packages">
-        {cards.map((_, i) => (
-          <div key={i} className="sp-card" role="status" aria-hidden="true">
-            <div className="sp-card__media" />
-            <div className="sp-card__body">
-              <div className="sp-card-title" />
-              <div className="sp-card-sub" />
-              <div className="sp-actions">
-                <div className="sp-btn sp-btn-primary" />
-                <div className="sp-btn sp-btn-outline" />
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      <div className="ui-tour__more">
-        <div className="sp-btn-primary" style={{ width: 160 }} />
-      </div>
-    </section>
+        </article>
+      ))}
+    </div>
   );
 };
 
@@ -132,7 +108,7 @@ const ToursPage = () => {
     return () => obs.disconnect();
   }, [sourceTours, listingScrollRef.current, sentinelRef.current]);
 
-  const onView = (id) => navigate(`/packages/${id}`);
+  const onView = (id) => navigate(`/tours/${id}`);
 
   return (
     <main className="tours-page">
@@ -162,11 +138,7 @@ const ToursPage = () => {
             role="region"
             aria-label="Tours listing"
           >
-            {/* top loader / preloader */}
-            {initialLoading && displayed.length === 0 && <TourPreloader />}
-
-            {(initialLoading && displayed.length > 0) && <SmallInlineLoader message="Updating results..." />}
-            {(!initialLoading && displayed.length > 0 && filteredTours !== null) && <SmallInlineLoader message="Showing filtered results" />}
+            {initialLoading && displayed.length === 0 && <TourListSkeleton />}
 
             {(initialError) && (
               <div className="tours-page__message tours-page__message--error" role="alert">

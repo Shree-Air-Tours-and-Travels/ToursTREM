@@ -13,7 +13,7 @@ import fetchData from "../../../utils/fetchData";
  * Filters (final)
  *
  * - onChange(toursArray) is called when Apply or Reset returns tours
- * - uses /filters.json for structure & defaults, and calls /api/filters for dynamic options if available
+ * - uses one /filters.json call for structure, defaults, and dynamic backend options
  */
 const Filters = ({ onChange }) => {
   // primary source for metadata (static fallback)
@@ -21,8 +21,6 @@ const Filters = ({ onChange }) => {
 
   // local merged config (componentData will be the static JSON if present)
   const [meta, setMeta] = useState(componentData || null);
-  const [optionsOverridden, setOptionsOverridden] = useState(false);
-
   // UI state
   const [values, setValues] = useState(() => (componentData?.config?.defaults ? { ...componentData.config.defaults } : {}));
   const [errors, setErrors] = useState({});
@@ -38,44 +36,6 @@ const Filters = ({ onChange }) => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify(componentData)]);
-
-  // If server provides dynamic filters endpoint (/api/filters), load it and merge options
-  useEffect(() => {
-    let mounted = true;
-    const loadDynamic = async () => {
-      try {
-        // try server-driven filters (auto-extract). If not present, this will 404 and we fallback to static
-        const res = await fetchData("/filters.json", { method: "GET" });
-        if (!mounted || !res) return;
-        // prefer server componentData if present, else derive minimal
-        const serverMeta = res.componentData || res;
-        // Merge into meta: keep existing structure, but override options & defaults if server provides them
-        setMeta((prev) => {
-          const base = prev || {};
-          const merged = {
-            ...base,
-            ...serverMeta,
-            config: { ...(base.config || {}), ...(serverMeta.config || {}) },
-            structure: { ...(base.structure || {}), ...(serverMeta.structure || {}) },
-          };
-          return merged;
-        });
-        setOptionsOverridden(true);
-        // if server provided defaults, update values to use them (but only if user hasn't modified anything)
-        if ((serverMeta?.config?.defaults) && (!Object.values(values || {}).some((v) => v !== "" && v !== undefined && v !== null))) {
-          setValues({ ...serverMeta.config.defaults });
-        }
-      } catch (e) {
-        // fallback: keep static meta
-        // console.debug("No server filters endpoint or failed to load /api/filters, using static metadata.");
-      }
-    };
-    loadDynamic();
-    return () => {
-      mounted = false;
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   // convenience refs
   const structure = meta?.structure || {};
@@ -212,8 +172,7 @@ const Filters = ({ onChange }) => {
     await doApply(values, act);
   };
 
-  // UI: Preloader
-  const Preloader = () => (
+  const FiltersSkeleton = () => (
     <div className="filters-skeleton">
       <div className="s-row">
         <div className="s-box" />
@@ -249,7 +208,7 @@ const Filters = ({ onChange }) => {
         {expanded && (
           <>
             <div className="filters-card__body">
-              {loadingMeta && <Preloader />}
+              {loadingMeta && <FiltersSkeleton />}
               {metaError && <div className="filters__error">Failed to load filter metadata</div>}
 
               {!loadingMeta && !metaError && rows.map((row, ri) => (

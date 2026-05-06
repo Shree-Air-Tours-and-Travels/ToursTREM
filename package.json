@@ -19,8 +19,8 @@
     "cross-env": "^7.0.3"
   },
   "scripts": {
-    "start": "cross-env PORT=3004 craco start",
-    "build": "craco build",
+    "start": "cross-env PORT=3001 DISABLE_ESLINT_PLUGIN=true craco start",
+    "build": "cross-env DISABLE_ESLINT_PLUGIN=true craco build",
     "test": "craco test",
     "eject": "react-scripts eject"
   },

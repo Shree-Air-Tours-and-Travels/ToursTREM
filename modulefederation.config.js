@@ -4,7 +4,9 @@ module.exports = {
     name: "toursTREM",
     filename: "remoteEntry.js",
     exposes: {
+        "./App": "./src/App.jsx",
         "./ToursApp": "./src/App.jsx",
+        "./FeaturedTours": "./src/widgets/FeaturedTours.jsx",
     },
     shared: {
         react: {

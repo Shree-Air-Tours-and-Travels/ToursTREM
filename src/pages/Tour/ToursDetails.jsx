@@ -14,7 +14,6 @@ import Icon from "../../icons/Icon.jsx";
 import Title from "../../stories/Title.jsx";
 import SubTitle from "../../stories/SubTitle.jsx";
 import BookingModal from "../../modals/BookingModal.jsx";
-import GlobalLoader from "../../components/Loader/Loader.jsx";
 import { useDeviceType } from "../../utils/useDevicetype.js";
 
 /**
@@ -27,16 +26,56 @@ import { useDeviceType } from "../../utils/useDevicetype.js";
 
 const REVIEWS_CHUNK = 5;
 
-const normalizePackagesRoute = (url) => {
-    if (!url || url === "/tours") return "/packages";
-    if (url.startsWith("/tours/")) return url.replace("/tours/", "/packages/");
+const TourDetailsSkeleton = () => (
+    <main className="tour-details tour-details--loading" role="status" aria-live="polite" aria-label="Loading tour details">
+        <div className="tour-details__loading-hero" />
+        <div className="tour-details__loading-content">
+            <div className="tour-details__loading-main">
+                <div className="tour-details__loading-line tour-details__loading-line--title" />
+                <div className="tour-details__loading-line" />
+                <div className="tour-details__loading-line" />
+                <div className="tour-details__loading-line tour-details__loading-line--short" />
+            </div>
+            <aside className="tour-details__loading-side">
+                <div className="tour-details__loading-line tour-details__loading-line--title" />
+                <div className="tour-details__loading-line" />
+                <div className="tour-details__loading-button" />
+            </aside>
+        </div>
+    </main>
+);
+
+const normalizeToursRoute = (url) => {
+    if (!url || url === "/packages") return "/tours";
+    if (url.startsWith("/packages/")) return url.replace("/packages/", "/tours/");
     return url;
 };
 
+const getRouteIdentityFromPath = (pathname) => {
+    const parts = pathname.split("/").filter(Boolean);
+    const toursIndex = parts.indexOf("tours");
+    const packagesIndex = parts.indexOf("packages");
+    const appIndex = toursIndex >= 0 ? toursIndex : packagesIndex;
+    const relevantParts = appIndex >= 0 ? parts.slice(appIndex + 1) : parts;
+
+    if (relevantParts[0] === "slug" && relevantParts[1]) {
+        return { slug: decodeURIComponent(relevantParts[1]) };
+    }
+
+    if (relevantParts[0]) {
+        return { id: decodeURIComponent(relevantParts[0]) };
+    }
+
+    return {};
+};
+
 const TourDetails = () => {
-    const { id, slug } = useParams();
+    const params = useParams();
     const location = useLocation();
     const navigate = useNavigate();
+    const routeIdentity = getRouteIdentityFromPath(location.pathname);
+    const id = params.id || routeIdentity.id;
+    const slug = params.slug || routeIdentity.slug;
 
     const [modalOpen, setModalOpen] = useState(false);
     const [formData, setFormData] = useState(null);
@@ -143,7 +182,7 @@ const TourDetails = () => {
     };
 
     const pageDescription = get(tour, "_page.description", tour?.description);
-    if (loading) return <GlobalLoader visible={loading} text={`Fetching ${tour?.title || "tour"}`} />;
+    if (loading) return <TourDetailsSkeleton />;
     if (error) return <div className="ui-error">{typeof error === "string" ? error : "Failed to load tour"}</div>;
     if (!tour) return <div className="ui-error">Tour not found</div>;
 
@@ -475,7 +514,7 @@ const TourDetails = () => {
                     <div className="page-actions__left">
                         <button
                             className="action-back"
-                            onClick={() => navigate(normalizePackagesRoute(get(componentData, "actions.back.url", "/packages")))}
+                            onClick={() => navigate(normalizeToursRoute(get(componentData, "actions.back.url", "/tours")))}
                             aria-label="Back to list"
                         >
                             <Icon name="backArrow" />
@@ -555,7 +594,7 @@ const TourDetails = () => {
                                         setBookingOpen(true);
                                     }}
                                     onContact={handleContactClick}
-                                    goBack={(url) => navigate(normalizePackagesRoute(url))}
+                                    goBack={(url) => navigate(normalizeToursRoute(url))}
                                 />
                             </aside>
                         )}
@@ -612,7 +651,7 @@ const TourDetails = () => {
                                     setBookingOpen(true);
                                 }}
                                 onContact={handleContactClick}
-                                goBack={(url) => navigate(normalizePackagesRoute(url))}
+                                goBack={(url) => navigate(normalizeToursRoute(url))}
                             />
                         </div>
                     </aside>

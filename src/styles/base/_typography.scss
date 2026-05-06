@@ -7,12 +7,12 @@
 /* ------------------------------
    1) Layout / Breakpoint variables
    ------------------------------ */
-$container-width: 1200px;
+$container-width: 1180px;
 $full-width: 1400px;
 /* Breakpoints (single source) */
-$breakpoint-mobile: 480px;               // small phones
+$breakpoint-mobile: 640px;               // phones
 $breakpoint-phablet: 576px;              // large phones
-$breakpoint-tablet: 768px;               // tablets portrait
+$breakpoint-tablet: 900px;               // tablets portrait
 $breakpoint-tablet-landscape: 1024px;    // tablets landscape
 $breakpoint-laptop: 1280px;              // small desktops / laptops
 $breakpoint-desktop: 1440px;             // desktops
@@ -31,8 +31,8 @@ $desktop-max: $breakpoint-wide - 1px;
 /* ------------------------------
    2) Core typography tokens
    ------------------------------ */
-$font-primary: "Poppins", sans-serif;
-$font-secondary: "Roboto", sans-serif;
+$font-primary: "Inter", "Poppins", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+$font-secondary: $font-primary;
 
 $font-size-xs: 0.75rem;   // 12px
 $font-size-sm: 0.875rem;  // 14px
@@ -57,19 +57,25 @@ $line-height-lg: 1.75;
    3) Color tokens (Sass & CSS vars)
    ------------------------------ */
 /* Sass-level colors (used for compile-time fallbacks where needed) */
-$primary-color: #1c7578;    // teal-blue
-$secondary-color: #3bb5b9; 
-$tertiary-color:#4e8d8e; // teal-sky
-$accent-color: #ff9900;
-$success-color: #28a745;
-$danger-color: #dc3545;
+$primary-color: #0f766e;
+$secondary-color: #2563eb;
+$tertiary-color: #3f8f8a;
+$accent-color: #f59e0b;
+$success-color: #16a34a;
+$danger-color: #dc2626;
 
-$light-bg: #f8f9fa;
-$white-color: #fefefe;
-$text-dark: #1c1c1c;
-$text-muted: #6c757d;
-$border-color: #ced4da;
+$light-bg: #f6fbfa;
+$white-color: #ffffff;
+$text-dark: #17211f;
+$text-muted: #64746f;
+$border-color: rgba(23, 33, 31, 0.12);
 $text-light:$border-color;
+$surface-muted: #eef7f5;
+$radius-sm: 6px;
+$radius-md: 8px;
+$radius-lg: 12px;
+$shadow-soft: 0 14px 30px rgba(20, 41, 38, 0.08);
+$shadow-card: 0 8px 22px rgba(15, 23, 42, 0.06);
 
 /* CSS variables for runtime theming (light theme defaults) */
 :root {
@@ -85,6 +91,12 @@ $text-light:$border-color;
   --text: #{$text-dark};
   --muted: #{$text-muted};
   --border: #{$border-color};
+  --surface-muted: #{$surface-muted};
+  --radius-sm: #{$radius-sm};
+  --radius-md: #{$radius-md};
+  --radius-lg: #{$radius-lg};
+  --shadow-soft: #{$shadow-soft};
+  --shadow-card: #{$shadow-card};
 
   --container-width: #{$container-width};
   --root-font-size: 16px;
@@ -99,9 +111,9 @@ $text-light:$border-color;
   --border: rgba(255,255,255,0.06);
 
   /* keep same accent but provide a darker variant tuned for dark background */
-  --color-primary: #1c7578;
-  --color-primary-dark: #{darken(#1c7578, 10%)};
-  --color-secondary: #3bb5b9;
+  --color-primary: #0f766e;
+  --color-primary-dark: #{darken(#0f766e, 10%)};
+  --color-secondary: #2563eb;
   --color-accent: #ffb84d;
 }
 
@@ -148,6 +160,33 @@ $text-light:$border-color;
   -webkit-line-clamp: $lines;
   overflow: hidden;
   max-height: ($lines * $line-height) + 0rem;
+}
+
+@mixin app-container($max: $container-width) {
+  width: min(#{$max}, calc(100% - 32px));
+  margin-inline: auto;
+}
+
+@mixin card-surface {
+  background: $white-color;
+  border: 1px solid $border-color;
+  border-radius: $radius-md;
+  box-shadow: $shadow-card;
+}
+
+@mixin skeleton-shimmer($bg: $surface-muted) {
+  position: relative;
+  overflow: hidden;
+  background: $bg;
+
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    transform: translateX(-100%);
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.75), transparent);
+    animation: trem-shimmer 1.2s infinite linear;
+  }
 }
 
 /* ------------------------------
@@ -324,27 +363,6 @@ input, textarea, select {
 }
 
 /* ------------------------------
-   9) Preloader skeleton helpers
-   ------------------------------ */
-$hp-bg: $secondary-color;
-$hp-shimmer: linear-gradient(90deg, rgba(2,1,1,0) 0%, rgba(2,16,72,0.12) 50%, rgba(255,255,255,0) 100%);
-
-.sp-card {
-  background: transparent;
-  border-radius: 12px;
-  padding: 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  &__media { width: 100%; height: 120px; border-radius: 10px; background: $hp-bg; position: relative; overflow: hidden; }
-  &__body { display:flex; flex-direction:column; gap:8px; }
-}
-.sp-card__media::after, .sp-card-title::after, .sp-card-sub::after, .sp-btn::after {
-  content: ""; position: absolute; left: -150%; top: 0; height: 100%; width: 250%; background-image: $hp-shimmer; animation: trem-shimmer 1.2s linear infinite;
-}
-@keyframes trem-shimmer { 0% { transform: translateX(-60%);} 100% { transform: translateX(60%);} }
-
-/* ------------------------------
    10) Utilities
    ------------------------------ */
 .text-primary { color: var(--color-primary); }
@@ -387,6 +405,7 @@ a:focus, button:focus, input:focus { box-shadow: 0 0 0 4px rgba(28,117,120,0.06)
 @media (prefers-reduced-motion: reduce) {
   * { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; }
 }
+@keyframes trem-shimmer { to { transform: translateX(100%); } }
 @media print {
   body { background: #fff; color: #000; }
   a::after { content: " (" attr(href) ")"; font-size: 0.85em; }
@@ -394,5 +413,3 @@ a:focus, button:focus, input:focus { box-shadow: 0 0 0 4px rgba(28,117,120,0.06)
 }
 
 /* End of _typography.scss */
-
-

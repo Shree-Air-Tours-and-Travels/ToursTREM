@@ -225,3 +225,92 @@
   /* focus states */
   a:focus, button:focus { outline: 3px solid rgba($primary-color, 0.14); outline-offset: 3px; }
 }
+
+.tour-details--loading {
+  width: min(1180px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 48px 0;
+}
+
+.tour-details__loading-hero,
+.tour-details__loading-main,
+.tour-details__loading-side {
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 12px;
+  background: $white-color;
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.06);
+}
+
+.tour-details__loading-hero,
+.tour-details__loading-line,
+.tour-details__loading-button {
+  position: relative;
+  overflow: hidden;
+  background: rgba($primary-color, 0.08);
+
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    transform: translateX(-100%);
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.75), transparent);
+    animation: tour-details-clean-shimmer 1.2s infinite linear;
+  }
+}
+
+.tour-details__loading-hero {
+  height: 320px;
+  margin-bottom: 20px;
+}
+
+.tour-details__loading-content {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: 20px;
+}
+
+.tour-details__loading-main,
+.tour-details__loading-side {
+  padding: 20px;
+}
+
+.tour-details__loading-line {
+  height: 12px;
+  margin-bottom: 14px;
+  border-radius: 999px;
+
+  &--title {
+    width: 62%;
+    height: 20px;
+  }
+
+  &--short {
+    width: 42%;
+  }
+}
+
+.tour-details__loading-button {
+  width: 150px;
+  height: 42px;
+  margin-top: 18px;
+  border-radius: 8px;
+}
+
+@keyframes tour-details-clean-shimmer {
+  to { transform: translateX(100%); }
+}
+
+@media (max-width: 768px) {
+  .tour-details--loading {
+    width: calc(100% - 24px);
+    padding: 24px 0;
+  }
+
+  .tour-details__loading-content {
+    grid-template-columns: 1fr;
+  }
+
+  .tour-details__loading-hero {
+    height: 220px;
+  }
+}

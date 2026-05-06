@@ -8,6 +8,8 @@ $filters-shadow: 0 6px 18px rgba(15, 23, 42, 0.06);
 $filters-border: 1px solid rgba(15, 23, 42, 0.04);
 $filters-width: 360px;
 $filters-padding: 14px;
+$filters-skeleton-bg: rgba($primary-color, 0.08);
+$filters-skeleton-shimmer: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.75), transparent);
 
 /* -------- Filters card (sticky) -------- */
 .filters-card {
@@ -154,7 +156,7 @@ $filters-padding: 14px;
   font-size: 0.92rem;
 }
 
-/* ---- skeleton / preloader ---- */
+/* Component-local skeleton */
 .filters-skeleton {
   display: flex;
   flex-direction: column;
@@ -167,7 +169,7 @@ $filters-padding: 14px;
       flex: 1;
       height: 36px;
       border-radius: 8px;
-      background: $hp-bg;
+      background: $filters-skeleton-bg;
       position: relative;
       overflow: hidden;
 
@@ -178,20 +180,16 @@ $filters-padding: 14px;
         top: 0;
         height: 100%;
         width: 250%;
-        background-image: $hp-shimmer;
-        animation: service-shimmer 1.2s linear infinite;
+        background-image: $filters-skeleton-shimmer;
+        animation: filters-clean-shimmer 1.2s linear infinite;
       }
     }
   }
 }
 
-/* shimmer */
-@keyframes service-shimmer {
-  0% {
-    transform: translateX(-60%);
-  }
-  100% {
-    transform: translateX(60%);
+@keyframes filters-clean-shimmer {
+  to {
+    transform: translateX(100%);
   }
 }
 
