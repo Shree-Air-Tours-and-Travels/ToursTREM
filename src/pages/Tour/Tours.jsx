@@ -61,6 +61,7 @@ const ToursPage = () => {
 
   // server-filtered tours (null => show allTours)
   const [filteredTours, setFilteredTours] = useState(null);
+  const [filterMeta, setFilterMeta] = useState({ total: null, filters: {} });
 
   // visible count for infinite scrolling
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
@@ -71,6 +72,7 @@ const ToursPage = () => {
 
   // source tours = server results if available else initial list
   const sourceTours = filteredTours !== null ? filteredTours : allTours;
+  const totalResults = Array.isArray(sourceTours) ? sourceTours.length : 0;
   const displayed = useMemo(
     () => (Array.isArray(sourceTours) ? sourceTours.slice(0, visibleCount) : []),
     [sourceTours, visibleCount]
@@ -109,14 +111,25 @@ const ToursPage = () => {
   }, [sourceTours, listingScrollRef.current, sentinelRef.current]);
 
   const onView = (id) => navigate(`/tours/${id}`);
+  const handleFilterChange = (tours, meta = {}) => {
+    setFilteredTours(Array.isArray(tours) ? tours : null);
+    setFilterMeta(meta || {});
+  };
 
   return (
     <main className="tours-page">
       <div className="tours-page__inner">
         <header className="tours-page__header">
           <div className="tours-page__header__left">
+            <span className="tours-page__eyebrow">ToursTREM catalog</span>
             <Title text={pageTitle} variant="primary" />
             <SubTitle text={"Explore curated tours across stunning destinations"} variant="primary" size="small" />
+          </div>
+          <div className="tours-page__header__right">
+            <div className="tours-page__result-pill">
+              <span className="tours-page__result-pill-icon" aria-hidden />
+              <span>{totalResults} tours</span>
+            </div>
           </div>
         </header>
 
@@ -128,7 +141,7 @@ const ToursPage = () => {
           <aside className="tours-page__sidebar">
             {/* Filters runs API calls and returns tours via onChange */}
             <div className="tours-page__sidebar-inner">
-              <Filters onChange={(tours) => setFilteredTours(Array.isArray(tours) ? tours : null)} />
+              <Filters onChange={handleFilterChange} />
             </div>
           </aside>
 
@@ -147,8 +160,16 @@ const ToursPage = () => {
             )}
 
             {!initialLoading && !initialError && displayed.length === 0 && (
-              <div className="tours-page__message">No tours found.</div>
+              <div className="tours-page__message">No tours found. Try widening the price, dates, or destination filters.</div>
             )}
+
+            <div className="tours-page__listing-header">
+              <div>
+                <span>Showing</span>
+                <strong>{displayed.length} of {totalResults}</strong>
+              </div>
+              {filterMeta?.reset ? <span>All tours</span> : <span>{filteredTours !== null ? "Filtered results" : "Latest inventory"}</span>}
+            </div>
 
             <div className="tours-page__list" aria-live="polite">
               {displayed.map((t) => (

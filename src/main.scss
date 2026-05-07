@@ -1,14 +1,4 @@
-:root {
-    color-scheme: light;
-    --tours-bg: #f6fbfa;
-    --tours-surface: #ffffff;
-    --tours-border: rgba(23, 33, 31, 0.12);
-    --tours-text: #17211f;
-    --tours-muted: #64746f;
-    --tours-accent: #0f766e;
-    --tours-accent-dark: #115e59;
-    --tours-shadow: 0 14px 30px rgba(20, 41, 38, 0.08);
-}
+@import "./styles/base/typography";
 
 * {
     box-sizing: border-box;
@@ -16,9 +6,9 @@
 
 body {
     margin: 0;
-    font-family: "Inter", "Poppins", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    background: var(--tours-bg);
-    color: var(--tours-text);
+    font-family: $font-primary;
+    background: var(--page-bg);
+    color: var(--text);
 }
 
 a {
@@ -31,8 +21,48 @@ a {
 
 .tours-app-shell {
     min-height: 100vh;
+    background: var(--page-bg);
+    color: var(--text);
 }
 
 .tours-app-shell--embedded {
     min-height: auto;
+}
+
+.micro-app-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    min-height: 72px;
+    padding: 0 1.5rem;
+    background: var(--surface-glass-strong);
+    border-bottom: 1px solid var(--border);
+    box-shadow: var(--shadow-sm);
+    backdrop-filter: blur(14px);
+
+    &__brand,
+    &__theme-toggle {
+        border: 0;
+        background: var(--color-transparent);
+    }
+
+    &__brand {
+        color: var(--text);
+        font-weight: $font-bold;
+        font-size: $font-size-lg;
+    }
+
+    &__theme-toggle {
+        color: var(--color-primary-dark);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        padding: 0.45rem 0.75rem;
+    }
+}
+
+.app-status {
+    padding: 1.5rem;
+    color: var(--text);
+    background: var(--page-bg);
 }

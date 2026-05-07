@@ -12,6 +12,10 @@ const Button = ({
   href,
   target = "_self",
   primaryClassName = "", // new prop
+  className = "",
+  type = "button",
+  disabled = false,
+  ...rest
 }) => {
   const classNames = `
     ui-button 
@@ -21,18 +25,19 @@ const Button = ({
     ${secondaryColor ? `ui-button--secondary-${secondaryColor}` : ""} 
     ${isCircular ? "ui-button--circular" : ""} 
     ${primaryClassName}
+    ${className}
   `.trim();
 
   if (href) {
     return (
-      <a href={href} target={target} className={classNames}>
+      <a href={href} target={target} className={classNames} aria-disabled={disabled} {...rest}>
         {text}
       </a>
     );
   }
 
   return (
-    <button className={classNames} onClick={onClick}>
+    <button className={classNames} onClick={onClick} type={type} disabled={disabled} {...rest}>
       {text}
     </button>
   );
