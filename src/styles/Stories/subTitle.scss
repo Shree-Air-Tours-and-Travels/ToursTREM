@@ -8,19 +8,19 @@
   margin-bottom: 0.5rem;
 
   &--light {
-    color: $text-light;
+    color: var(--text-light);
   }
 
   &--primary {
-    color: $primary-color;
+    color: var(--title-accent);
   }
 
   &--secondary {
-    color: $secondary-color;
+    color: var(--subtitle);
   }
 
   &--tertiary {
-    color:$tertiary-color;
+    color: var(--color-tertiary-text);
   }
 
   &--small {

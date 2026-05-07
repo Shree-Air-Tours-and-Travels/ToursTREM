@@ -3,7 +3,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import "./filters.scss";
 import useComponentData from "../../../hooks/useComponentData";
 import FieldViewResolver from "./FieldViewResolver";
-import { getOptionList, validateAll } from "./filtersUtils";
+import { getActiveFilterCount, getOptionList, validateAll } from "./filtersUtils";
 import Title from "../../../stories/Title";
 import SubTitle from "../../../stories/SubTitle";
 import Button from "../../../stories/Button";
@@ -15,6 +15,8 @@ import fetchData from "../../../utils/fetchData";
  * - onChange(toursArray) is called when Apply or Reset returns tours
  * - uses one /filters.json call for structure, defaults, and dynamic backend options
  */
+const isCompactViewport = () => typeof window !== "undefined" && window.innerWidth <= 900;
+
 const Filters = ({ onChange }) => {
   // primary source for metadata (static fallback)
   const { loading: loadingMeta, error: metaError, componentData } = useComponentData("/filters.json", { auto: true });
@@ -26,7 +28,8 @@ const Filters = ({ onChange }) => {
   const [errors, setErrors] = useState({});
   const [loadingAction, setLoadingAction] = useState(false);
   const [message, setMessage] = useState(null);
-  const [expanded, setExpanded] = useState(false);
+  const [expanded, setExpanded] = useState(() => !isCompactViewport());
+  const [lastResultCount, setLastResultCount] = useState(null);
 
   // When useComponentData updates (initial load), sync meta and defaults
   useEffect(() => {
@@ -43,6 +46,9 @@ const Filters = ({ onChange }) => {
   const actions = Array.isArray(structure.actions) ? structure.actions : [];
   const rows = (structure.layout && structure.layout.rows) || [fieldsArr.map((f) => f.name)];
   const serverOptions = meta?.config?.options || {};
+  const defaults = meta?.config?.defaults || {};
+  const summary = meta?.config?.summary || {};
+  const activeCount = getActiveFilterCount(values, defaults);
 
   // field map
   const fieldsMap = useMemo(() => {
@@ -111,8 +117,17 @@ const Filters = ({ onChange }) => {
 
       const tours = extractToursFromResponse(res);
       // notify parent with tours array (could be empty)
-      if (typeof onChange === "function") onChange(tours);
-      setMessage({ type: "success", text: action.successMessage || "Filters applied" });
+      const serverErrors = res?.componentData?.state?.data?.errors || res?.componentData?.config?.validation?.errors;
+      if (serverErrors && Object.keys(serverErrors).length) {
+        setErrors(serverErrors);
+        setExpanded(true);
+        setMessage({ type: "error", text: res.message || "Please fix validation errors" });
+        return;
+      }
+      setLastResultCount(tours.length);
+      if (typeof onChange === "function") onChange(tours, { filters: payload, total: tours.length });
+      setMessage({ type: "success", text: action.successMessage || `${tours.length} tours matched` });
+      if (isCompactViewport()) setExpanded(false);
     } catch (err) {
       setMessage({ type: "error", text: err?.message || "Failed to apply filters" });
     } finally {
@@ -130,6 +145,7 @@ const Filters = ({ onChange }) => {
     if (!action?.endpoint) {
       // nothing to fetch; clear parent by sending empty array (or keep as-is)
       if (typeof onChange === "function") onChange([]);
+      if (isCompactViewport()) setExpanded(false);
       return;
     }
 
@@ -141,8 +157,10 @@ const Filters = ({ onChange }) => {
       });
 
       const tours = extractToursFromResponse(res);
-      if (typeof onChange === "function") onChange(tours);
+      setLastResultCount(null);
+      if (typeof onChange === "function") onChange(tours, { filters: {}, total: tours.length, reset: true });
       setMessage({ type: "success", text: action.successMessage || "Filters reset" });
+      if (isCompactViewport()) setExpanded(false);
     } catch (err) {
       setMessage({ type: "error", text: err?.message || "Reset failed" });
     } finally {
@@ -191,18 +209,26 @@ const Filters = ({ onChange }) => {
       <div className="filters-card__sticky">
         <div className="filters-card__header">
           <div className="filters-card__header-left">
+            <span className="filters-card__eyebrow">{summary.totalTours || 0} live tours</span>
             <Title text={meta?.title || "Filters"} size="medium" primaryClassname="ui-filter-title" />
             {meta?.description && <SubTitle className="filters-card__desc" text={meta.description} />}
           </div>
 
           <div className="filters-card__header-right">
             <Button
-              text={expanded ? "Collapse" : "Expand"}
+              text={expanded ? "Hide" : `Filters${activeCount ? ` (${activeCount})` : ""}`}
               onClick={() => setExpanded((s) => !s)}
               size="small"
+              variant="outline"
               aria-expanded={expanded}
             />
           </div>
+        </div>
+
+        <div className="filters-card__quick-stats" aria-label="Filter ranges">
+          <span>{serverOptions?.priceRange?.min || 0} - {serverOptions?.priceRange?.max || 0} INR</span>
+          <span>{serverOptions?.dayRange?.min || 1} - {serverOptions?.dayRange?.max || 1} days</span>
+          <span>{serverOptions?.groupSizeRange?.max || 0} max pax</span>
         </div>
 
         {expanded && (
@@ -244,15 +270,16 @@ const Filters = ({ onChange }) => {
               <div className="filters-actions">
                 {actions.map((act, i) => {
                   const isApply = act && (act.name === "apply" || act.type === "apply");
-                  const btnClass = act.className || (isApply ? "button button--primary" : "button");
                   return (
                     <Button
                       key={`act-${i}`}
-                      className={btnClass}
                       type="button"
                       text={isApply ? (act.label || "Apply") : (act.label || "Action")}
                       disabled={loadingAction}
                       onClick={() => handleActionClick(act)}
+                      variant={isApply ? "solid" : "outline"}
+                      color={isApply ? "primary" : "secondary"}
+                      size="small"
                     />
                   );
                 })}
@@ -261,6 +288,7 @@ const Filters = ({ onChange }) => {
               <div className="filters-status">
                 {loadingAction && <span className="filters-status__loading">Processing…</span>}
                 {message && <span className={`filters-status__${message.type}`}>{message.text}</span>}
+                {!message && lastResultCount !== null && <span>{lastResultCount} results</span>}
               </div>
             </div>
           </>

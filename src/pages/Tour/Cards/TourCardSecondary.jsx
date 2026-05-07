@@ -6,12 +6,25 @@ import Title from "../../../stories/Title";
 import SubTitle from "../../../stories/SubTitle";
 import Button from "../../../stories/Button";
 
+const getRouteText = (tour = {}) => {
+    const origin = tour.city?.from || "Flexible start";
+    const destination = tour.city?.to || tour.address?.city || "Curated destination";
+    return `${origin} to ${destination}`;
+};
+
+const getPriceText = (tour = {}) => {
+    const price = tour.priceInfo || tour.price;
+    if (!price) return "Price on request";
+    const currency = price.currency || "INR";
+    if (Number(price.min) <= 0 && Number(price.max) <= 0) return "Price on request";
+    if (price.isFinal || Number(price.min) === Number(price.max)) return `${currency} ${price.min}`;
+    return `${currency} ${price.min} - ${price.max}`;
+};
+
 const TourCardSecondary = ({ tour, onView, isAdmin = false, onEdit, onDelete }) => {
     const {
         _id,
         title,
-        city,
-        address,
         photo,
         photos = [],
         period = {},
@@ -25,21 +38,8 @@ const TourCardSecondary = ({ tour, onView, isAdmin = false, onEdit, onDelete }) 
     const displayRating =
         Number.isFinite(avgRating) ? Number(avgRating).toFixed(1) : "0.0";
 
-    const price =
-        tour.priceInfo ||
-        (tour.price
-            ? {
-                min: tour.price.min,
-                max: tour.price.max,
-                currency: tour.price.currency,
-            }
-            : null);
-
-    const priceText = price
-        ? price.isFinal
-            ? `${price.currency} ${price.min}`
-            : `Approx. ${price.currency} ${price.min} - ${price.max}`
-        : "—";
+    const priceText = getPriceText(tour);
+    const routeText = getRouteText(tour);
 
     const handleView = () => {
         if (typeof onView === "function") onView(_id);
@@ -60,7 +60,6 @@ const TourCardSecondary = ({ tour, onView, isAdmin = false, onEdit, onDelete }) 
         <article
             className={`tour-card-list ${featured ? "is-featured" : ""}`}
             aria-labelledby={`tour-${_id}-title`}
-            role="article"
         >
             <div className="tour-card-list__media" aria-hidden={!imageSrc}>
                 {featured && <span className="tour-card-list__badge">Featured</span>}
@@ -73,17 +72,19 @@ const TourCardSecondary = ({ tour, onView, isAdmin = false, onEdit, onDelete }) 
                         className="tour-card-list__img"
                     />
                 ) : (
-                    <div className="tour-card-list__placeholder">Image unavailable</div>
+                    <div className="tour-card-list__placeholder">
+                        <span>TravelsTREM</span>
+                    </div>
                 )}
             </div>
 
             <div className="tour-card-list__content">
                 <div className="tour-card-list__header">
-                    <Title text={title || "Untitled Tour"} variant="primary" size="small" />
+                    <div className="tour-card-list__kicker">{routeText}</div>
+                    <Title text={title || "Untitled Tour"} variant="primary" size="small" primaryClassname="tour-card-list__title" />
                     <div className="tour-card-list__meta">
                         <SubTitle
-                            text={`${city?.from || address?.city?.from || "Unknown"} → ${city?.to || address?.city?.to || "Unknown"
-                                } • ${period?.days ?? "-"} days • ${maxGroupSize ?? "-"} pax`}
+                            text={`${period?.days ?? "-"} days / ${period?.nights ?? "-"} nights / up to ${maxGroupSize ?? "-"} travelers`}
                             variant="secondary"
                             size="small"
                         />
@@ -112,6 +113,7 @@ const TourCardSecondary = ({ tour, onView, isAdmin = false, onEdit, onDelete }) 
 
             <aside className="tour-card-list__aside" aria-hidden={false}>
                 <div className="tour-card-list__price">
+                    <span className="tour-card-list__price-label">From</span>
                     <p className="price">{priceText}</p>
                     {avgRating !== undefined && (
                         <div className="rating">

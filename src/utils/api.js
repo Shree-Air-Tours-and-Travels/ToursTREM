@@ -1,4 +1,5 @@
 import axios from "axios";
+import { getConfiguredApiBase } from "../config/portalEnvironment";
 
 function normalizeBase(raw) {
     if (raw == null || raw === "") return raw;
@@ -6,9 +7,9 @@ function normalizeBase(raw) {
     return `https://${raw}`.replace(/\/$/, "");
 }
 
-const RAW_BASE = process.env.REACT_APP_API_URL || "";
+const RAW_BASE = getConfiguredApiBase();
 const BASE = normalizeBase(RAW_BASE) ?? "";
-const baseURL = (`${BASE}/api`).replace(/([^:]\/)\/+/g, "$1");
+const baseURL = (BASE.endsWith("/api") ? BASE : `${BASE}/api`).replace(/([^:]\/)\/+/g, "$1");
 
 const api = axios.create({
     baseURL,
