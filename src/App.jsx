@@ -2,8 +2,10 @@ import React from "react";
 import AppRoutes from "./routes/AppRoutes";
 import { initApp } from "./core/initApp";
 import "./main.scss";
+import { useThemeMode } from "./hooks/useThemeMode";
 
 export default function App({ embedded = false }) {
+    const { theme, toggleTheme } = useThemeMode();
     const [state, setState] = React.useState({
         loading: !embedded,
         error: null,
@@ -42,16 +44,22 @@ export default function App({ embedded = false }) {
 
     if (state.loading) return null;
 
-    if (state.error) {
-        return <div style={{ padding: 24 }}>ToursTREM initialization failed: {state.error}</div>;
-    }
+    if (state.error) return <div className="app-status">ToursTREM initialization failed: {state.error}</div>;
 
     if (!embedded && !state.session?.isAuthenticated) {
-        return <div style={{ padding: 24 }}>Authentication required. Please sign in from the shell app.</div>;
+        return <div className="app-status">Authentication required. Please sign in from the shell app.</div>;
     }
 
     return (
         <div className={embedded ? "tours-app-shell tours-app-shell--embedded" : "tours-app-shell"}>
+            {!embedded && (
+                <header className="micro-app-header">
+                    <button className="micro-app-header__brand" type="button">ToursTREM</button>
+                    <button className="micro-app-header__theme-toggle" type="button" onClick={toggleTheme}>
+                        {theme === "dark" ? "Light" : "Dark"}
+                    </button>
+                </header>
+            )}
             <AppRoutes embedded={embedded} />
         </div>
     );

@@ -144,12 +144,13 @@ export const fetchData = async (endpoint, options = {}) => {
     };
   } catch (err) {
     const serverMsg = err?.response?.data?.message || err.message || "Network error";
+    const serverComponentData = err?.response?.data?.componentData;
     // also expose server error details in console for dev clarity
     console.debug("[fetchData] request failed:", serverMsg);
     return {
       status: "error",
       message: serverMsg,
-      componentData: {
+      componentData: serverComponentData || {
         title: "",
         description: "",
         data: [],

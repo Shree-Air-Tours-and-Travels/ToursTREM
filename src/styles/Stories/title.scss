@@ -4,19 +4,19 @@
   font-family: $font-primary;
   font-size: $font-size-xxl;
   font-weight: $font-bold;
-  color: $text-dark;
+  color: var(--title);
   text-align: center;
 
   &--light {
-    color: $white-color;
+    color: var(--color-on-primary);
   }
 
   &--primary {
-    color: $primary-color;
+    color: var(--title-accent);
   }
 
   &--secondary {
-    color: $secondary-color;
+    color: var(--color-secondary);
   }
 
   &--small {
