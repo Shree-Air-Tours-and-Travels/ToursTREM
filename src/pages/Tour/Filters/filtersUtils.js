@@ -1,160 +1,125 @@
-// components/Filters/filtersUtils.js
-/**
- * Helpers to resolve select options and validate fields/values.
- * - getOptionList(field, serverOptions)
- * - validateField(name, value, field, serverOptions)
- * - validateAll(values, fieldsMap, serverOptions)
- */
+const emptyValues = [undefined, null, ""];
+
+const toArray = (value) => {
+  if (Array.isArray(value)) return value;
+  if (emptyValues.includes(value)) return [];
+  return [value];
+};
+
+const toOptionValue = (option) => {
+  if (typeof option === "string") return option;
+  return option?.value;
+};
+
+const getOptionValues = (options = []) => new Set(options.map((option) => String(toOptionValue(option))));
 
 export function getOptionList(field = {}, serverOptions = {}) {
   if (!field) return [];
-
-  // explicit options (field.options)
   if (Array.isArray(field.options) && field.options.length) return field.options;
-
-  // optionsSource (points to serverOptions key)
-  if (field.optionsSource && serverOptions[field.optionsSource]) {
-    return serverOptions[field.optionsSource];
-  }
-
-  // config helpers: featured, ratings
-  const label = (field.label || "").toLowerCase();
-  if (label.includes("featured") && Array.isArray(serverOptions.featured)) return serverOptions.featured;
-  if (label.includes("rating") && Array.isArray(serverOptions.ratings)) return serverOptions.ratings;
-
-  // fallback: if serverOptions has a key with the field name
-  if (serverOptions[field.name]) return serverOptions[field.name];
-
-  // default empty
+  if (field.optionsSource && Array.isArray(serverOptions[field.optionsSource])) return serverOptions[field.optionsSource];
+  if (Array.isArray(serverOptions[field.name])) return serverOptions[field.name];
   return [];
 }
 
-/**
- * Validate a single field value.
- * Returns { ok: boolean, error: string|null }.
- */
+export function getActiveFilterCount(values = {}, defaults = {}) {
+  return Object.keys(values).reduce((count, key) => {
+    const value = values[key];
+    const fallback = defaults[key];
+    if (Array.isArray(value)) return count + (value.length ? 1 : 0);
+    if (!emptyValues.includes(value) && value !== fallback) return count + 1;
+    return count;
+  }, 0);
+}
+
 export function validateField(name, value, field = {}, serverOptions = {}) {
   const type = field.type || "text";
+  const required = !!field.required;
 
-  // treat missing value as empty string for text/number/date
-  if (value === undefined || value === null) value = "";
+  if (emptyValues.includes(value) || (Array.isArray(value) && !value.length)) {
+    return required ? { ok: false, error: "Required" } : { ok: true, error: null };
+  }
 
-  // Common validation containers
   if (type === "number") {
-    // empty is allowed (means "not set"). If you want to force numeric presence, add field.required in JSON.
-    if (value === "") return { ok: true, error: null };
-    if (Number.isNaN(Number(value))) return { ok: false, error: "Must be a number" };
-    const num = Number(value);
-    if (field.min !== undefined && num < field.min) return { ok: false, error: `Minimum ${field.min}` };
-    if (field.max !== undefined && num > field.max) return { ok: false, error: `Maximum ${field.max}` };
-
-    // extra heuristics: guest counts use serverOptions.maxGuests
-    if (name === "adults" && serverOptions.maxGuests && num < 1) return { ok: false, error: "At least 1 adult required" };
+    const number = Number(value);
+    if (!Number.isFinite(number)) return { ok: false, error: "Enter a valid number" };
+    if (field.min !== undefined && number < Number(field.min)) return { ok: false, error: `Minimum ${field.min}` };
+    if (field.max !== undefined && number > Number(field.max)) return { ok: false, error: `Maximum ${field.max}` };
     return { ok: true, error: null };
   }
 
   if (type === "date") {
-    if (value === "") return { ok: true, error: null };
-    const d = new Date(value);
-    if (Number.isNaN(d.getTime())) return { ok: false, error: "Invalid date" };
-
-    // check dateRange from serverOptions (if present)
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return { ok: false, error: "Enter a valid date" };
     const dateRange = serverOptions.dateRange || {};
-    if (dateRange.earliest) {
-      const earliest = new Date(dateRange.earliest);
-      if (!Number.isNaN(earliest.getTime()) && d < earliest) return { ok: false, error: `Date must be on/after ${dateRange.earliest}` };
-    }
-    if (dateRange.latest) {
-      const latest = new Date(dateRange.latest);
-      if (!Number.isNaN(latest.getTime()) && d > latest) return { ok: false, error: `Date must be on/before ${dateRange.latest}` };
-    }
+    if (dateRange.earliest && date < new Date(dateRange.earliest)) return { ok: false, error: `Earliest ${dateRange.earliest}` };
+    if (dateRange.latest && date > new Date(dateRange.latest)) return { ok: false, error: `Latest ${dateRange.latest}` };
     return { ok: true, error: null };
   }
 
   if (type === "select") {
-    // allow blank (means Any)
-    if (value === "" || value === null) return { ok: true, error: null };
-    const opts = getOptionList(field, serverOptions);
-    // if options are strings
-    if (Array.isArray(opts) && opts.length > 0 && typeof opts[0] === "string") {
-      if (!opts.includes(value)) return { ok: false, error: "Invalid selection" };
-      return { ok: true, error: null };
-    }
-    // array of {label,value}
-    if (Array.isArray(opts) && opts.length > 0) {
-      if (!opts.find((o) => String(o.value) === String(value))) return { ok: false, error: "Invalid selection" };
-      return { ok: true, error: null };
-    }
-    // no options to validate against
+    const options = getOptionList(field, serverOptions);
+    const values = getOptionValues(options);
+    if (values.size && !values.has(String(value))) return { ok: false, error: "Choose a valid option" };
     return { ok: true, error: null };
   }
 
-  // text field: check required/length if specified
+  if (type === "multiselect") {
+    const options = getOptionList(field, serverOptions);
+    const values = getOptionValues(options);
+    const selected = toArray(value).map(String);
+    if (values.size && selected.some((item) => !values.has(item))) return { ok: false, error: "Choose valid options" };
+    return { ok: true, error: null };
+  }
+
   if (type === "text") {
-    if (field.required && (value === "" || value === null)) return { ok: false, error: "Required" };
-    if (field.maxLength && value.length > field.maxLength) return { ok: false, error: `Max ${field.maxLength} chars` };
+    const text = String(value);
+    if (field.maxLength && text.length > field.maxLength) return { ok: false, error: `Max ${field.maxLength} characters` };
     return { ok: true, error: null };
   }
 
-  // fallback
   return { ok: true, error: null };
 }
 
-/**
- * Validate entire form:
- * - runs validateField for each field in fieldsMap
- * - additional cross-field validation: returnDate >= arrivalDate, minPrice <= maxPrice, minDays <= maxDays
- * Returns: { ok: boolean, errors: { [fieldName]: string } }
- */
 export function validateAll(values = {}, fieldsMap = {}, serverOptions = {}) {
   const errors = {};
-  console.log(values , serverOptions, "validateAll", fieldsMap)
 
-  // per-field
-  for (const name of Object.keys(fieldsMap)) {
-    const f = fieldsMap[name];
-    const v = values[name];
-    const res = validateField(name, v, f, serverOptions);
-    if (!res.ok) errors[name] = res.error || "Invalid";
-  }
+  Object.keys(fieldsMap).forEach((name) => {
+    const result = validateField(name, values[name], fieldsMap[name], serverOptions);
+    if (!result.ok) errors[name] = result.error || "Invalid";
+  });
 
-  // cross-field checks
-  // price range
-  const minPrice = values.minPrice;
-  const maxPrice = values.maxPrice;
-  if (minPrice !== "" && maxPrice !== "" && minPrice !== undefined && maxPrice !== undefined) {
-    const mn = Number(minPrice);
-    const mx = Number(maxPrice);
-    if (!Number.isNaN(mn) && !Number.isNaN(mx) && mn > mx) {
-      errors.minPrice = errors.minPrice || "Min price must be <= max price";
-      errors.maxPrice = errors.maxPrice || "Max price must be >= min price";
+  const checkRange = (minName, maxName, message) => {
+    const min = values[minName];
+    const max = values[maxName];
+    if (emptyValues.includes(min) || emptyValues.includes(max)) return;
+    const minNumber = Number(min);
+    const maxNumber = Number(max);
+    if (Number.isFinite(minNumber) && Number.isFinite(maxNumber) && minNumber > maxNumber) {
+      errors[minName] = errors[minName] || message.min;
+      errors[maxName] = errors[maxName] || message.max;
+    }
+  };
+
+  checkRange("minPrice", "maxPrice", {
+    min: "Min price must be below max",
+    max: "Max price must be above min",
+  });
+  checkRange("minDays", "maxDays", {
+    min: "Min days must be below max",
+    max: "Max days must be above min",
+  });
+
+  if (values.arrivalDate && values.returnDate) {
+    const arrival = new Date(values.arrivalDate);
+    const ret = new Date(values.returnDate);
+    if (!Number.isNaN(arrival.getTime()) && !Number.isNaN(ret.getTime()) && arrival > ret) {
+      errors.arrivalDate = errors.arrivalDate || "Arrival must be before return";
+      errors.returnDate = errors.returnDate || "Return must be after arrival";
     }
   }
 
-  // days range
-  const minDays = values.minDays;
-  const maxDays = values.maxDays;
-  if (minDays !== "" && maxDays !== "" && minDays !== undefined && maxDays !== undefined) {
-    const mn = Number(minDays);
-    const mx = Number(maxDays);
-    if (!Number.isNaN(mn) && !Number.isNaN(mx) && mn > mx) {
-      errors.minDays = errors.minDays || "Min days must be <= max days";
-      errors.maxDays = errors.maxDays || "Max days must be >= min days";
-    }
-  }
-
-  // date range
-  const arrival = values.arrivalDate;
-  const ret = values.returnDate;
-  if (arrival && ret) {
-    const a = new Date(arrival);
-    const r = new Date(ret);
-    if (!Number.isNaN(a.getTime()) && !Number.isNaN(r.getTime()) && a > r) {
-      errors.arrivalDate = errors.arrivalDate || "Arrival must be on/before Return";
-      errors.returnDate = errors.returnDate || "Return must be on/after Arrival";
-    }
-  }
-
-  const ok = Object.keys(errors).length === 0;
-  return { ok, errors };
+  return {
+    ok: Object.keys(errors).length === 0,
+    errors,
+  };
 }

@@ -1,169 +1,189 @@
 @import "../../styles/base/typography";
 
-/* ===========================================================
-   Tours page styles (two-column: filters + listing)
-   =========================================================== */
-
-/* tokens */
-$tours-gap: 1.25rem;
-$tours-max-width: 1200px;
-$tours-padding: 1.25rem;
-$tours-card-radius: 12px;
-$tours-card-shadow: 0 8px 22px rgba(15, 23, 42, 0.06);
-$tours-break-3col: 1280px;
-$tours-break-2col: 900px;
-$tours-break-1col: 480px;
-
-/* CSS variables for runtime tweaks */
 :root {
-  --tours-header-height: 120px; /* adjust to header height (desktop) */
-  --filters-sticky-top: 20px;   /* offset inside sidebar for sticky filters */
+  --tours-header-height: 132px;
+  --filters-sticky-top: 18px;
 }
 
-/* Root container */
 .tours-page {
   width: 100%;
-  box-sizing: border-box;
-  padding: $tours-padding;
-  background: transparent;
-  color: $tertiary-color;
+  min-height: 100vh;
+  padding: clamp(1rem, 2.5vw, 2rem);
+  background:
+    linear-gradient(180deg, var(--primary-softer), var(--color-transparent) 320px),
+    var(--page-bg);
+  color: var(--text);
 
   &__inner {
-    max-width: $tours-max-width;
+    width: min(1480px, 100%);
     margin: 0 auto;
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
   }
 
-  /* header area (title + small intro) */
   &__header {
     display: flex;
-    flex-wrap: wrap;
-    align-items: flex-start;
-    gap: 1rem;
+    align-items: flex-end;
     justify-content: space-between;
+    gap: 1rem;
+    padding: 1.25rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--surface-glass-strong);
+    box-shadow: var(--shadow-sm);
+    backdrop-filter: blur(16px);
 
     &__left {
-      min-width: 220px;
+      min-width: 0;
       display: flex;
       flex-direction: column;
-      gap: 0.25rem;
+      gap: 0.35rem;
+
+      .ui-title {
+        margin: 0;
+        color: var(--title) !important;
+        font-size: clamp(2rem, 4vw, 3.6rem) !important;
+        line-height: 0.98 !important;
+      }
+
+      .ui-subtitle {
+        margin: 0;
+        color: var(--subtitle) !important;
+        text-align: left !important;
+      }
     }
 
     &__right {
-      /* legacy: you used this earlier — keep relative so sticky is contained */
-      position: relative;
-      min-width: 300px;
-      width: 100%;
-      display: flex;
-      justify-content: flex-end;
-      align-items: flex-start;
+      flex: 0 0 auto;
     }
   }
 
-  /* Two-column body: sidebar (filters) + listing */
+  &__eyebrow {
+    @include type-xs();
+    color: var(--color-primary-dark);
+    font-weight: $font-bold;
+    text-transform: uppercase;
+  }
+
+  &__result-pill {
+    @include type-sm();
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    min-height: 42px;
+    padding: 0.65rem 0.9rem;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: var(--surface-inset);
+    color: var(--text);
+    font-weight: $font-bold;
+  }
+
+  &__result-pill-icon {
+    width: 14px;
+    height: 14px;
+    border: 2px solid var(--color-primary-dark);
+    border-radius: 50%;
+    box-shadow:
+      7px 0 0 -3px var(--color-primary-dark),
+      -7px 0 0 -3px var(--color-primary-dark);
+  }
+
   &__body {
-    display: flex;
+    display: grid;
+    grid-template-columns: minmax(320px, 380px) minmax(0, 1fr);
     gap: 1.25rem;
-    align-items: flex-start;
+    align-items: stretch;
+  }
+
+  &__sidebar {
+    min-width: 0;
+    height: calc(100vh - var(--tours-header-height));
+  }
+
+  &__sidebar-inner {
     width: 100%;
   }
 
-  /* Sidebar for filters */
-  &__sidebar {
-    min-width: 260px;
-    max-width: 420px;
-    box-sizing: border-box;
-    display: flex;
-    align-items: flex-start;
-
-    &-inner {
-      width: 100%;
-      position: relative; /* contains sticky child */
-    }
-  }
-
-  /* Make the Filters wrapper sticky inside the sidebar */
   .filters-card__sticky {
     position: sticky;
     top: var(--filters-sticky-top);
-    z-index: 40;
-    align-self: flex-start;
-    width: 100%;
-  }
-
-  /* Listing column (scrollable) */
-  &__listing {
-    flex: 1 1 auto;
-    min-width: 0;
-    box-sizing: border-box;
-
-    /* Constrain vertical height so the listing scrolls independently */
+    z-index: 20;
+    height: 100%;
     max-height: calc(100vh - var(--tours-header-height));
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-    padding-right: 8px; /* keep content clear of scrollbar */
   }
 
-  &__content {
-    background: transparent;
+  &__listing {
+    min-width: 0;
+    height: calc(100vh - var(--tours-header-height));
+    max-height: none;
+    overflow-y: auto;
+    scroll-behavior: smooth;
+    padding: 0 0.4rem 2rem 0;
+    scrollbar-width: thin;
+    scrollbar-color: var(--primary-focus) var(--color-transparent);
+  }
+
+  &__listing-header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
     display: flex;
-    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
     gap: 1rem;
-    position: relative;
-    padding-bottom: 2rem;
+    margin-bottom: 0.85rem;
+    padding: 0.8rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--surface-glass-strong);
+    box-shadow: var(--shadow-sm);
+    backdrop-filter: blur(14px);
+
+    div {
+      display: inline-flex;
+      align-items: baseline;
+      gap: 0.4rem;
+    }
+
+    span {
+      @include type-xs();
+      color: var(--muted);
+      font-weight: $font-semibold;
+    }
+
+    strong {
+      @include type-sm();
+      color: var(--text);
+      font-weight: $font-bold;
+    }
+  }
+
+  &__list {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  &__card {
+    min-width: 0;
   }
 
   &__message {
+    margin-bottom: 1rem;
     padding: 1rem;
+    border: 1px solid var(--border);
     border-radius: 8px;
-    background: rgba(0, 0, 0, 0.03);
-    color: $primary-color;
+    background: var(--surface);
+    color: var(--text);
 
     &--error {
-      background: rgba(255, 0, 0, 0.05);
+      background: var(--danger-soft);
       color: $danger-color;
     }
   }
 
-  &__inline-loader {
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 0.95rem;
-    color: $text-muted;
-
-    &__dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      background: $primary-color;
-      animation: tours-pulse 1s infinite;
-    }
-
-    &__text {
-      opacity: 0.95;
-    }
-  }
-
-  /* List / cards in the listing column — keep simple vertical flow */
-  &__list {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-    padding: 1rem 0;
-    align-items: stretch;
-  }
-
-  &__card {
-    width: 100%;
-    display: flex;
-    box-sizing: border-box;
-    border-radius: 12px;
-  }
-
-  /* sentinel for intersection observer at the end of the list */
   &__sentinel {
     height: 1px;
     width: 100%;
@@ -172,46 +192,39 @@ $tours-break-1col: 480px;
   &__loading-grid {
     display: grid;
     grid-template-columns: 1fr;
-    gap: 16px;
-    width: 100%;
-    padding: 1rem 0;
+    gap: 1rem;
   }
 
   &__loading-card {
-    min-height: 220px;
-    border: 1px solid rgba(15, 23, 42, 0.08);
-    border-radius: 12px;
-    background: $white-color;
-    overflow: hidden;
-    box-shadow: $tours-card-shadow;
+    min-height: 230px;
     display: grid;
-    grid-template-columns: 220px minmax(0, 1fr);
+    grid-template-columns: 260px minmax(0, 1fr);
+    overflow: hidden;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--surface);
+    box-shadow: var(--shadow-sm);
   }
 
   &__loading-media,
   &__loading-line {
     position: relative;
     overflow: hidden;
-    background: rgba($primary-color, 0.08);
+    background: var(--surface-inset);
 
     &::after {
       content: "";
       position: absolute;
       inset: 0;
       transform: translateX(-100%);
-      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.75), transparent);
+      background: linear-gradient(90deg, var(--color-transparent), var(--surface-shimmer), var(--color-transparent));
       animation: tours-clean-shimmer 1.2s infinite linear;
     }
   }
 
-  &__loading-media {
-    min-height: 100%;
-    height: auto;
-  }
-
   &__loading-body {
-    padding: 16px;
     align-self: center;
+    padding: 1.25rem;
   }
 
   &__loading-line {
@@ -231,41 +244,51 @@ $tours-break-1col: 480px;
 }
 
 @keyframes tours-clean-shimmer {
-  to { transform: translateX(100%); }
+  to {
+    transform: translateX(100%);
+  }
 }
 
-/* responsive: layout stacks on small screens */
-@media (max-width: 980px) {
+@media (max-width: 900px) {
   .tours-page {
-    padding: 12px;
-
     &__body {
-      flex-direction: column;
+      grid-template-columns: 1fr;
     }
 
     &__sidebar {
-      width: 100%;
-      max-width: none;
-      order: 0;
+      height: auto;
     }
 
     &__listing {
+      height: auto;
       max-height: none;
       overflow: visible;
-      order: 1;
       padding-right: 0;
     }
 
-    .filters-card__sticky {
+    &__loading-card:nth-child(n + 2) {
+      display: none;
+    }
+
+    .filters-card__sticky,
+    &__listing-header {
       position: static;
-      top: auto;
+      height: auto;
+      max-height: none;
     }
   }
 }
 
-/* other small device tweaks */
 @media (max-width: 720px) {
   .tours-page {
+    padding: 0.85rem;
+
+    &__header,
+    &__listing-header {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+
     &__loading-card {
       grid-template-columns: 1fr;
     }
@@ -275,12 +298,3 @@ $tours-break-1col: 480px;
     }
   }
 }
-
-@media (max-width: 420px) {
-  .tours-page { padding: 10px; }
-}
-
-/* NOTE:
-   - position: sticky will fail if any ancestor has overflow set (hidden/auto/scroll)
-     or an ancestor has a transform. If sticky doesn't appear to work, inspect parents.
-*/

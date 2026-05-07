@@ -7,7 +7,7 @@ $font-primary: if(
   $font-primary,
   "Poppins, sans-serif"
 );
-$accent-color: if(global-variable-exists(accent-color), $light-bg, #1e88e5);
+$accent-color: var(--color-primary);
 
 /* Component */
 .ui-gallery {
@@ -53,7 +53,7 @@ $accent-color: if(global-variable-exists(accent-color), $light-bg, #1e88e5);
     }
 
     .ui-gallery__btn {
-      background: transparent;
+      background: var(--color-transparent);
       border: none;
       font-size: 1.25rem;
       padding: 0.35rem 0.6rem;
@@ -82,8 +82,8 @@ $accent-color: if(global-variable-exists(accent-color), $light-bg, #1e88e5);
     border-radius: 12px;
     background: linear-gradient(
       180deg,
-      rgba(0, 0, 0, 0.03),
-      rgba(0, 0, 0, 0.02)
+      var(--neutral-softer),
+      var(--neutral-softer)
     );
 
     /* aspect ratio using padding trick for broad browser support */
@@ -127,8 +127,8 @@ $accent-color: if(global-variable-exists(accent-color), $light-bg, #1e88e5);
       left: 1rem;
       bottom: 1rem;
       padding: 0.5rem 0.75rem;
-      background: rgba(0, 0, 0, 0.45);
-      color: $white-color;
+      background: var(--overlay);
+      color: var(--color-on-primary);
       border-radius: 6px;
       font-size: 0.9rem;
       max-width: calc(100% - 2rem);
@@ -157,7 +157,7 @@ $accent-color: if(global-variable-exists(accent-color), $light-bg, #1e88e5);
     border-radius: 6px;
     cursor: pointer;
     background: $text-dark;
-    color: #fff;
+    color: var(--color-on-primary);
     transition: background 0.2s ease;
 
     &:hover {
@@ -175,8 +175,8 @@ $accent-color: if(global-variable-exists(accent-color), $light-bg, #1e88e5);
       width: 10px;
       height: 10px;
       border-radius: 999px;
-      border: 1px solid #fff;
-      background: rgba(0, 0, 0, 0.06);
+      border: 1px solid var(--color-on-primary);
+      background: var(--neutral-soft);
       padding: 0;
       transition: transform 180ms ease, background 180ms ease;
       cursor: pointer;
@@ -184,7 +184,7 @@ $accent-color: if(global-variable-exists(accent-color), $light-bg, #1e88e5);
       &.is-active {
         transform: scale(1.15);
         background: var(--accent);
-        border-color: transparent;
+        border-color: var(--color-transparent);
       }
     }
   }
@@ -199,11 +199,11 @@ $accent-color: if(global-variable-exists(accent-color), $light-bg, #1e88e5);
 
     .ui-gallery__thumb {
       border: none;
-      background: transparent;
+      background: var(--color-transparent);
       padding: 0.25rem;
       cursor: pointer;
       border-radius: 6px;
-      box-shadow: 0 1px 0 rgba(0, 0, 0, 0.02) inset;
+      box-shadow: var(--shadow-sm) inset;
       display: inline-flex;
       align-items: center;
       justify-content: center;
@@ -231,7 +231,7 @@ $accent-color: if(global-variable-exists(accent-color), $light-bg, #1e88e5);
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(0, 0, 0, 0.85);
+    background: var(--overlay-strong);
 
     .ui-gallery__lightbox-content {
       max-width: 92vw;
@@ -249,11 +249,11 @@ $accent-color: if(global-variable-exists(accent-color), $light-bg, #1e88e5);
       max-height: 76vh;
       object-fit: contain;
       border-radius: 8px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      box-shadow: var(--shadow-lg);
     }
 
     .ui-gallery__lightbox-caption {
-      color: #fff;
+      color: var(--color-on-primary);
       opacity: 0.95;
       font-size: 0.95rem;
     }
@@ -262,9 +262,9 @@ $accent-color: if(global-variable-exists(accent-color), $light-bg, #1e88e5);
     .ui-gallery__lightbox-prev,
     .ui-gallery__lightbox-next {
       position: fixed;
-      background: transparent;
+      background: var(--color-transparent);
       border: none;
-      color: $white-color;
+      color: var(--color-on-primary);
       font-size: 2rem;
       cursor: pointer;
       padding: 0.25rem;

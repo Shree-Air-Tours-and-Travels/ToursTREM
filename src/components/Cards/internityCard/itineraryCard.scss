@@ -6,8 +6,8 @@
   &--modern {
     width: 100%;
     box-sizing: border-box;
-    background: var(--card-bg, $white-color);
-    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+    background: var(--card-bg);
+    box-shadow: var(--shadow-md);
     display: flex;
     flex-direction: column;
     gap: 8px;
@@ -17,7 +17,7 @@
     overflow: visible;      // default: no internal scroll on small devices
     -webkit-overflow-scrolling: touch;
     transition: background 160ms ease;
-    color: var(--text, #1f2937);
+    color: var(--text);
     min-height: 0;
   }
 
@@ -30,7 +30,7 @@
   }
 
   &__meta {
-    color: var(--muted, #6b7280);
+    color: var(--muted);
     font-size: clamp(0.82rem, 1vw + 0.0rem, 0.92rem);
   }
 
@@ -56,7 +56,7 @@
   align-items: flex-start;
   padding: 10px;
   border-radius: 10px;
-  background: rgba(0, 0, 0, 0.02);
+  background: var(--neutral-softer);
   min-height: 56px;
   box-sizing: border-box;
   flex-wrap: nowrap;
@@ -72,8 +72,8 @@
   max-width: 88px;
   padding: 8px;
   border-radius: 8px;
-  background: linear-gradient(180deg, rgba(11,85,85,0.06), rgba(11,85,85,0.02));
-  color: var(--accent, #0b5);
+  background: linear-gradient(180deg, var(--primary-soft), var(--primary-softer));
+  color: var(--color-primary);
   font-weight: 700;
   font-size: clamp(0.82rem, 1vw + 0.02rem, 0.98rem);
   text-align: center;
@@ -105,7 +105,7 @@
   font-size: clamp(0.96rem, 1.2vw + 0.02rem, 1.06rem);
   font-weight: 600;
   margin: 0;
-  color: var(--heading, #0f172a);
+  color: var(--heading);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -116,14 +116,14 @@
   display: flex;
   gap: 8px;
   align-items: center;
-  color: var(--muted, #6b7280);
+  color: var(--muted);
   font-size: clamp(0.8rem, 0.9vw + 0.02rem, 0.92rem);
 }
 
 /* overview paragraph */
 .ic-overview {
   font-size: clamp(0.88rem, 1vw + 0.02rem, 0.98rem);
-  color: var(--muted, #525252);
+  color: var(--muted);
   line-height: 1.35;
   word-break: break-word;
 }
@@ -131,7 +131,7 @@
 /* activities */
 .ic-activities {
   font-size: clamp(0.86rem, 0.95vw + 0.02rem, 0.96rem);
-  color: var(--muted, #444);
+  color: var(--muted);
   display: block;
   line-height: 1.4;
   word-break: break-word;
@@ -139,7 +139,7 @@
 
   strong {
     margin-right: 6px;
-    color: var(--heading, #0f172a);
+    color: var(--heading);
     font-weight: 600;
   }
 }
@@ -147,8 +147,8 @@
 /* notes */
 .ic-notes {
   font-size: 0.9rem;
-  color: var(--muted, #5b5b5b);
-  background: rgba(15, 23, 42, 0.02);
+  color: var(--muted);
+  background: var(--neutral-softer);
   padding: 8px 10px;
   border-radius: 8px;
   margin-top: 6px;
@@ -159,7 +159,7 @@
   display: flex;
   gap: 12px;
   align-items: center;
-  color: var(--muted, #666);
+  color: var(--muted);
   font-size: clamp(0.82rem, 0.9vw + 0.01rem, 0.92rem);
   flex-wrap: wrap;
 }
@@ -180,7 +180,7 @@
 
 /* empty state */
 .ic-empty {
-  color: var(--muted, #777);
+  color: var(--muted);
   padding: 8px 0;
   font-size: clamp(0.9rem, 1vw + 0.02rem, 1rem);
 }
@@ -199,7 +199,7 @@
   .itinerary-card--modern {
     padding: 14px 16px;
     border-radius: 14px;
-    box-shadow: 0 10px 28px rgba(15, 23, 42, 0.07);
+    box-shadow: var(--shadow-md);
   }
 
   .ic-list__item {
