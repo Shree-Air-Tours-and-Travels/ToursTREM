@@ -1,11 +1,16 @@
 const { container } = require("webpack");
 const moduleFederationConfig = require("./modulefederation.config");
 
+const backendTarget =
+    process.env.REACT_APP_BACKEND_URL ||
+    process.env.REACT_APP_API_URL?.replace(/\/api\/?$/, "") ||
+    "http://localhost:5000";
+
 module.exports = {
     devServer: (devServerConfig) => {
         devServerConfig.proxy = {
             "/api": {
-                target: "http://localhost:5000",
+                target: backendTarget,
                 changeOrigin: true,
                 secure: false,
                 ws: false,
