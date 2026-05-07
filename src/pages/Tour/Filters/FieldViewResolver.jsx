@@ -16,7 +16,9 @@ export default function FieldViewResolver({
 
   const type = field.type || "text";
   const label = field.label || name;
+  const placeholder = field.placeholder || label;
   const inputValue = value === undefined ? (field.value === undefined ? "" : field.value) : value;
+  const describedBy = error ? `${name}-error` : undefined;
 
   switch (type) {
     case "number": {
@@ -44,12 +46,14 @@ export default function FieldViewResolver({
               type="number"
               min={min}
               max={max}
-              placeholder={label}
+              placeholder={placeholder}
               value={inputValue === "" ? "" : inputValue}
               onChange={onInput(name, "number")}
+              aria-invalid={!!error}
+              aria-describedby={describedBy}
             />
           </label>
-          {error && <div className="filters__fieldError">{error}</div>}
+          {error && <div className="filters__fieldError" id={describedBy}>{error}</div>}
         </div>
       );
     }
@@ -62,7 +66,13 @@ export default function FieldViewResolver({
         <div className="fv-wrapper">
           <label className="filters__label" key={name}>
             <span className="filters__labelText">{label}</span>
-            <select className={`filters__input ${error ? "filters__input--error" : ""}`} value={inputValue} onChange={onInput(name, "select")}>
+            <select
+              className={`filters__input ${error ? "filters__input--error" : ""}`}
+              value={inputValue}
+              onChange={onInput(name, "select")}
+              aria-invalid={!!error}
+              aria-describedby={describedBy}
+            >
               {isSimpleStringArray ? (
                 <>
                   <option value="">{`Any ${label.toLowerCase()}`}</option>
@@ -84,7 +94,46 @@ export default function FieldViewResolver({
               )}
             </select>
           </label>
-          {error && <div className="filters__fieldError">{error}</div>}
+          {error && <div className="filters__fieldError" id={describedBy}>{error}</div>}
+        </div>
+      );
+    }
+
+    case "multiselect": {
+      const opts = getOptionList(field) || [];
+      const selected = Array.isArray(inputValue) ? inputValue.map(String) : [];
+      const toggleValue = (optionValue) => {
+        const next = selected.includes(String(optionValue))
+          ? selected.filter((item) => item !== String(optionValue))
+          : [...selected, String(optionValue)];
+        onInput(name, "multiselect")(next);
+      };
+
+      return (
+        <div className="fv-wrapper">
+          <div className="filters__label" role="group" aria-describedby={describedBy}>
+            <span className="filters__labelText">{label}</span>
+            <div className={`filters__chips ${error ? "filters__chips--error" : ""}`}>
+              {opts.length ? opts.map((option) => {
+                const optionValue = typeof option === "string" ? option : option.value;
+                const optionLabel = typeof option === "string" ? option : option.label;
+                const isSelected = selected.includes(String(optionValue));
+
+                return (
+                  <button
+                    key={String(optionValue)}
+                    type="button"
+                    className={`filters__chip ${isSelected ? "is-selected" : ""}`}
+                    onClick={() => toggleValue(optionValue)}
+                    aria-pressed={isSelected}
+                  >
+                    {optionLabel}
+                  </button>
+                );
+              }) : <span className="filters__empty-options">No options yet</span>}
+            </div>
+          </div>
+          {error && <div className="filters__fieldError" id={describedBy}>{error}</div>}
         </div>
       );
     }
@@ -101,9 +150,11 @@ export default function FieldViewResolver({
               max={dateRange.latest || ""}
               value={inputValue || ""}
               onChange={onInput(name, "date")}
+              aria-invalid={!!error}
+              aria-describedby={describedBy}
             />
           </label>
-          {error && <div className="filters__fieldError">{error}</div>}
+          {error && <div className="filters__fieldError" id={describedBy}>{error}</div>}
         </div>
       );
 
@@ -111,10 +162,10 @@ export default function FieldViewResolver({
       return (
         <div className="fv-wrapper">
           <label className="filters__label filters__checkbox" key={name}>
-            <input className={`filters__input ${error ? "filters__input--error" : ""}`} type="checkbox" checked={!!inputValue} onChange={onInput(name, "checkbox")} />
+            <input className={`filters__input ${error ? "filters__input--error" : ""}`} type="checkbox" checked={!!inputValue} onChange={onInput(name, "checkbox")} aria-invalid={!!error} aria-describedby={describedBy} />
             <span className="filters__labelText">{label}</span>
           </label>
-          {error && <div className="filters__fieldError">{error}</div>}
+          {error && <div className="filters__fieldError" id={describedBy}>{error}</div>}
         </div>
       );
 
@@ -127,12 +178,15 @@ export default function FieldViewResolver({
             <input
               className={`filters__input ${name === "search" ? "filters__search" : ""} ${error ? "filters__input--error" : ""}`}
               type="text"
-              placeholder={label}
+              placeholder={placeholder}
+              maxLength={field.maxLength}
               value={inputValue || ""}
               onChange={onInput(name, "text")}
+              aria-invalid={!!error}
+              aria-describedby={describedBy}
             />
           </label>
-          {error && <div className="filters__fieldError">{error}</div>}
+          {error && <div className="filters__fieldError" id={describedBy}>{error}</div>}
         </div>
       );
   }

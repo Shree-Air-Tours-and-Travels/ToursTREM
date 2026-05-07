@@ -1,9 +1,12 @@
+import { getConfiguredApiBase } from "../config/portalEnvironment";
+
 const normalizeApiBase = (raw) => {
     const base = raw || "http://localhost:5000";
-    return `${base.replace(/\/$/, "")}/api`;
+    const normalized = base.replace(/\/$/, "");
+    return normalized.endsWith("/api") ? normalized : `${normalized}/api`;
 };
 
-export const API_BASE = normalizeApiBase(process.env.REACT_APP_API_URL);
+export const API_BASE = normalizeApiBase(getConfiguredApiBase());
 
 const getAuthHeaders = () => {
     const token = localStorage.getItem("auth_token") || localStorage.getItem("token");
